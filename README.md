@@ -96,10 +96,15 @@ $ make
 ```
 
 > Note: Prometheus is assumed to be running on http://localhost:9090
+
+## Run Locally
+```
+$ $GOPATH/bin/memhog-operator -v2 --prometheus-addr=http://localhost:9090 --kubeconfig=$HOME/.kube/config
+```
+
+## Run on Kubernetes
 ```
 // Create cluster role & cluster role binding to work with TPR's.
 $ kubectl create -f k8s/roles/role.yaml
-
-// Run the operator
-$ $GOPATH/bin/memhog-operator -v2 --prometheus-addr=http://localhost:9090 --kubeconfig=$HOME/.kube/config
+$ kubectl create -f k8s/deploy/memhog-operator-deploy.yaml
 ```
