@@ -6,13 +6,14 @@ import (
 	"os"
 	"time"
 
+	"k8s.io/apimachinery/pkg/api/resource"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
+	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/pkg/api"
-	"k8s.io/client-go/pkg/api/resource"
 	"k8s.io/client-go/pkg/api/v1"
-	"k8s.io/client-go/pkg/runtime"
-	utilruntime "k8s.io/client-go/pkg/util/runtime"
-	"k8s.io/client-go/pkg/watch"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 
@@ -54,11 +55,11 @@ type AppMonitorController struct {
 type AppMonitorControllerInformer struct {
 	// Store & controller for Pod resources
 	podStore      cache.Store
-	podController cache.ControllerInterface
+	podController cache.Controller
 
 	// Store & controller for AppMonitor resources
 	appMonitorStore      cache.Store
-	appMonitorController cache.ControllerInterface
+	appMonitorController cache.Controller
 }
 
 // Create a new Controller for the AppMonitor operator
@@ -167,22 +168,14 @@ func (amc *AppMonitorController) newAppMonitorControllerInformer() *AppMonitorCo
 }
 
 // Create a new Informer on the Pod resources in the cluster to track them.
-func (amc *AppMonitorController) newPodInformer() (cache.Store, cache.ControllerInterface) {
+func (amc *AppMonitorController) newPodInformer() (cache.Store, cache.Controller) {
 	return cache.NewInformer(
 		&cache.ListWatch{
-			ListFunc: func(alo api.ListOptions) (runtime.Object, error) {
-				// Retrieve a PodList from the the API
-				var lo v1.ListOptions
-				v1.Convert_api_ListOptions_To_v1_ListOptions(&alo, &lo, nil)
-
-				return amc.clientSet.CoreV1().Pods(amc.namespace).List(lo)
+			ListFunc: func(options metav1.ListOptions) (runtime.Object, error) {
+				return amc.clientSet.CoreV1().Pods(amc.namespace).List(options)
 			},
-			WatchFunc: func(alo api.ListOptions) (watch.Interface, error) {
-				// Watch the Pods in the API
-				var lo v1.ListOptions
-				v1.Convert_api_ListOptions_To_v1_ListOptions(&alo, &lo, nil)
-
-				return amc.clientSet.CoreV1().Pods(amc.namespace).Watch(lo)
+			WatchFunc: func(options metav1.ListOptions) (watch.Interface, error) {
+				return amc.clientSet.CoreV1().Pods(amc.namespace).Watch(options)
 			},
 		},
 		// The resource that the informer returns
@@ -224,27 +217,27 @@ func (amc *AppMonitorController) handlePodsUpdate(oldObj, newObj interface{}) {
 
 // Create a new Informer on the AppMonitor resources in the cluster to
 // track them.
-func (amc *AppMonitorController) newAppMonitorInformer() (cache.Store, cache.ControllerInterface) {
+func (amc *AppMonitorController) newAppMonitorInformer() (cache.Store, cache.Controller) {
 	return cache.NewInformer(
 		&cache.ListWatch{
-			ListFunc: func(alo api.ListOptions) (runtime.Object, error) {
+			ListFunc: func(options metav1.ListOptions) (runtime.Object, error) {
 				// Retrieve an AppMonitorList from the API
 				result := &AppMonitorList{}
 				err := amc.restClient.Get().
 					Resource(ResourceNamePlural).
-					VersionedParams(&alo, api.ParameterCodec).
+					VersionedParams(&options, api.ParameterCodec).
 					Do().
 					Into(result)
 
 				return result, err
 			},
-			WatchFunc: func(alo api.ListOptions) (watch.Interface, error) {
+			WatchFunc: func(options metav1.ListOptions) (watch.Interface, error) {
 				// Watch the AppMonitors in the API
 				return amc.restClient.Get().
 					Prefix("watch").
 					Namespace(amc.namespace).
 					Resource(ResourceNamePlural).
-					VersionedParams(&alo, api.ParameterCodec).
+					VersionedParams(&options, api.ParameterCodec).
 					Watch()
 			},
 		},
@@ -397,6 +390,9 @@ func (amc *AppMonitorController) run() {
 		r := results[0]
 
 		// Retrieve the metric in the (time, metric) tuple
+		for len(r.Values) < 1 {
+			time.Sleep(500 * time.Millisecond)
+		}
 		val := r.Values[1].Value
 
 		currentBytes := int(val)
@@ -506,7 +502,7 @@ func (amc *AppMonitorController) newPodFromPod(pod *v1.Pod, am *AppMonitor) *v1.
 
 	// Create and return new Pod with AppMonitor settings applied
 	return &v1.Pod{
-		ObjectMeta: v1.ObjectMeta{
+		ObjectMeta: metav1.ObjectMeta{
 			Name:      fmt.Sprintf("%s-autoscaled", pod.Name),
 			Namespace: pod.Namespace,
 		},
