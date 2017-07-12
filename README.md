@@ -95,11 +95,20 @@ $ glide up -v
 $ make
 ```
 
-> Note: Prometheus is assumed to be running on http://localhost:9090
+
+#### Run Locally
+> Note: Prometheus is assumed to be running locally on http://localhost:9090
+
+```
+$ $GOPATH/bin/memhog-operator -v2 --prometheus-addr=http://localhost:9090 --kubeconfig=$HOME/.kube/config
+```
+
+#### Run on Kubernetes
+> Note: Prometheus is assumed to be running by default on http://prometheus.tectonic-system:9090 (e.g. Tectonic Cluster) by the Operator Deployment
+
 ```
 // Create cluster role & cluster role binding to work with TPR's.
 $ kubectl create -f k8s/roles/role.yaml
 
-// Run the operator
-$ $GOPATH/bin/memhog-operator -v2 --prometheus-addr=http://localhost:9090 --kubeconfig=$HOME/.kube/config
+$ kubectl create -f k8s/deploy/memhog-operator-deploy.yaml
 ```
