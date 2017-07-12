@@ -1,8 +1,7 @@
 package operator
 
 import (
-	"k8s.io/client-go/pkg/api"
-	"k8s.io/client-go/pkg/api/unversioned"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // #############################################################################
@@ -37,15 +36,15 @@ type AppMonitorSpec struct {
 
 type AppMonitor struct {
 	// TODO: add Name field for AppMonitor as its currently missing
-	unversioned.TypeMeta `json:",inline"`
-	Metadata             api.ObjectMeta `json:"metadata"`
+	metav1.TypeMeta `json:",inline"`
+	Metadata        metav1.ObjectMeta `json:"metadata"`
 
 	Spec AppMonitorSpec `json:"spec"`
 }
 
 type AppMonitorList struct {
-	unversioned.TypeMeta `json:",inline"`
-	Metadata             unversioned.ListMeta `json:"metadata"`
+	metav1.TypeMeta `json:",inline"`
+	Metadata        metav1.ListMeta `json:"metadata"`
 
 	Items []AppMonitor `json:"items"`
 }

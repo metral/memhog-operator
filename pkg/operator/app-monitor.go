@@ -8,12 +8,12 @@ import (
 	"github.com/golang/glog"
 	"github.com/metral/memhog-operator/pkg/utils"
 
+	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/client-go/pkg/api"
-	"k8s.io/client-go/pkg/api/errors"
-	"k8s.io/client-go/pkg/api/meta"
-	"k8s.io/client-go/pkg/api/unversioned"
-	"k8s.io/client-go/pkg/runtime"
-	"k8s.io/client-go/pkg/runtime/serializer"
 	"k8s.io/client-go/rest"
 	// To authenticate against GKE clusters
 	//_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -65,7 +65,7 @@ func newAppMonitorClient(kubecfg *rest.Config, namespace string) (*rest.RESTClie
 // Configure the attributes for the kubecfg used in the AppMonitor API REST
 // client.
 func addAppMonitorToKubeConfig(kubecfg *rest.Config, domain, version string) {
-	groupversion := unversioned.GroupVersion{
+	groupversion := schema.GroupVersion{
 		Group:   domain,
 		Version: version,
 	}
@@ -81,7 +81,7 @@ func addAppMonitorToKubeConfig(kubecfg *rest.Config, domain, version string) {
 // Add the AppMonitor types to the api.Scheme for when needing to do type
 // conversions or a deep-copy of an AppMonitor object.
 func addAppMonitorToAPISchema(domain, version string) {
-	groupversion := unversioned.GroupVersion{
+	groupversion := schema.GroupVersion{
 		Group:   domain,
 		Version: version,
 	}
@@ -120,8 +120,8 @@ func addAppMonitorToAPISchema(domain, version string) {
 				groupversion,
 				&AppMonitor{},
 				&AppMonitorList{},
-				&api.ListOptions{},
-				&api.DeleteOptions{},
+				&metav1.ListOptions{},
+				&metav1.DeleteOptions{},
 			)
 			return nil
 		})
@@ -172,22 +172,22 @@ func CopyObjToAppMonitors(obj []interface{}) ([]AppMonitor, error) {
 // #############################################################################
 
 // Required to satisfy Object interface
-func (am *AppMonitor) GetObjectKind() unversioned.ObjectKind {
+func (am *AppMonitor) GetObjectKind() schema.ObjectKind {
 	return &am.TypeMeta
 }
 
 // Required to satisfy ObjectMetaAccessor interface
-func (am *AppMonitor) GetObjectMeta() meta.Object {
+func (am *AppMonitor) GetObjectMeta() metav1.Object {
 	return &am.Metadata
 }
 
 // Required to satisfy Object interface
-func (aml *AppMonitorList) GetObjectKind() unversioned.ObjectKind {
+func (aml *AppMonitorList) GetObjectKind() schema.ObjectKind {
 	return &aml.TypeMeta
 }
 
 // Required to satisfy ListMetaAccessor interface
-func (aml *AppMonitorList) GetListMeta() unversioned.List {
+func (aml *AppMonitorList) GetListMeta() metav1.List {
 	return &aml.Metadata
 }
 
@@ -238,7 +238,7 @@ func (aml *AppMonitorList) UnmarshalJSON(data []byte) error {
 
 func NewAppMonitor(name string, memThresholdPercent, memMultiplier float64) *AppMonitor {
 	return &AppMonitor{
-		Metadata: api.ObjectMeta{
+		Metadata: metav1.ObjectMeta{
 			Name: name,
 		},
 		Spec: AppMonitorSpec{
