@@ -6,12 +6,12 @@ import (
 
 // #############################################################################
 
-// Note: The following code is custom settings particular to the new TPR in the
+// Note: The following code is custom settings particular to the new CRD in the
 // cluster.
 
 // #############################################################################
 
-const TPRName string = "app-monitor"
+const CRDName string = "app-monitor"
 const ResourceName string = "appmonitor"
 const ResourceNamePlural string = "appmonitors"
 const Domain string = "kubedemo.com"
@@ -29,7 +29,7 @@ type AppMonitorSpec struct {
 // #############################################################################
 
 // Note: The following code is boilerplate code needed to satisfy the
-// AppMontior as a resource in the cluster in terms of how it expects TPR's to
+// AppMontior as a resource in the cluster in terms of how it expects CRD's to
 // be created, operate and used.
 
 // #############################################################################

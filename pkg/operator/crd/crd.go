@@ -1,4 +1,4 @@
-package tpr
+package crd
 
 import (
 	"fmt"
