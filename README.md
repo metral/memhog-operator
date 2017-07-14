@@ -51,32 +51,36 @@ thresholds and requirements declared in the `AppMonitor` onto the Pod.
         - name: memhog
           image: quay.io/metral/memhog:v0.0.1
           imagePullPolicy: Always
-          resources:
+          <b>resources:
             limits:
               memory: 384Mi
             requests:
-              memory: 256Mi
+              memory: 256Mi</b>
           ...
   </code></pre>
 
-* The Pod runs with a default set of resource requests & limits.
+* Run the annotated Pod, noting the resource requests & limits set that are
+also required by the Operator.
 
 * In the Pod's namespace there must also be an instantiated object of the custom
-`AppMonitor` CRD that the operator depends on e.g.:
+`AppMonitor` CRD that the Operator depends on. For example, this `AppMonitor`
+states that any Pod being monitored by the `memhog-operator` will have its
+resources doubled when 75% or more of its memory has been used e.g.:
 
   ```
   apiVersion: kubedemo.com/v1
   kind: AppMonitor
   metadata:
-    name: mymonitor
+    name: johnny-cache
   spec:
     memThresholdPercent: 75   # Percentage of (memory used) / (memory limit)
     memMultiplier: 2          # Multiplier factor used to increase memory resource requests & limits
   ```
 * The `memhog-operator` will watch the Pod's memory usage by querying
-Prometheus, apply the `AppMonitor` to the Pod as memory usage is retrieved, and redeploy the Pod 
-with higher resource requests & limits if the `AppMonitor` thresholds are crossed.
-* If the Pod is redeployed, it will have updated resource requests & limits
+Prometheus, applying the `AppMonitor` to the Pod as memory usage is retrieved.  If the `AppMonitor` threshold is crossed,
+the Operator will redeploy the Pod with higher resource requests & limits based
+on the multiplier.
+* If the Pod is redeployed, it will have updated and increased resource requests & limits
 e.g.:
 ```
   ...
