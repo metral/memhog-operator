@@ -165,7 +165,7 @@ func CopyObjToAppMonitors(obj []interface{}) ([]AppMonitor, error) {
 
 /*
  Note: The following code is boilerplate code needed to satisfy the
- AppMonitor as a resource in the cluster in terms of how it expects TPR's to
+ AppMonitor as a resource in the cluster in terms of how it expects CRD's to
  be created, operate and used.
 */
 
@@ -311,7 +311,7 @@ func ListAppMonitorsWithClient(kubecfg *rest.Config, namespace string) {
 		panic(err)
 	}
 
-	// Fetch a list of our TPRs
+	// Fetch a list of our CRDs
 	appmonitorList := AppMonitorList{}
 	err = client.Get().Resource(ResourceNamePlural).Do().Into(&appmonitorList)
 	if err != nil {

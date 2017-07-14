@@ -19,7 +19,7 @@ import (
 	"k8s.io/client-go/tools/cache"
 
 	"github.com/golang/glog"
-	"github.com/metral/memhog-operator/pkg/operator/tpr"
+	"github.com/metral/memhog-operator/pkg/operator/crd"
 	"github.com/metral/memhog-operator/pkg/utils"
 	prometheusClient "github.com/prometheus/client_golang/api"
 	prometheus "github.com/prometheus/client_golang/api/prometheus/v1"
@@ -89,13 +89,13 @@ func NewAppMonitorController(kubeconfig, namespace, prometheusAddr string) (
 		return nil, err
 	}
 
-	// Create & register the AppMonitor resource as a TPR in the cluster, if it
+	// Create & register the AppMonitor resource as a CRD in the cluster, if it
 	// doesn't exist
 	kind := reflect.TypeOf(AppMonitor{}).Name()
-	glog.V(2).Infof("Registering TPR: %s.%s | version: %s", TPRName, Domain, Version)
-	_, err = tpr.CreateCustomResourceDefinition(
+	glog.V(2).Infof("Registering CRD: %s.%s | version: %s", CRDName, Domain, Version)
+	_, err = crd.CreateCustomResourceDefinition(
 		apiextensionsClientSet,
-		TPRName,
+		CRDName,
 		Domain,
 		kind,
 		ResourceNamePlural,

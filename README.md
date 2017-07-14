@@ -10,17 +10,18 @@ threshold, it will be vertically autoscaled by the operator.
 Specifically, the operator will deploy a new copy of the Pod with a higher
 set of resource requests and limit, and then terminate the original Pod.
 The details of the higher resources are held within an `AppMonitor`,
-a custom TPR.
+a [CustomResourceDefinition
+(CRD)](https://github.com/kubernetes/apiextensions-apiserver/blob/fbe70034cb9becd97bf8b6207f918c73cadd330e/pkg/apis/apiextensions/types.go#L119-L129).
 
 [memhog](https://github.com/metral/memhog): An example Pod that this operator would monitor.
 
-> Note: The `memhog-operator` is strictly for demo purposes. It is not intended
+> Note: The `memhog-operator` is strictly for educational & demo purposes. It is not intended
 to be used for any other use-cases.
 
 ## Operator Structure
 
-The `memhog-operator` is a combination of a custom ThirdPartyResource (TPR)
-known as the `AppMonitor`, and a custom controller to enforce state.
+The `memhog-operator` is a combination of a CustomResourceDefinition
+known as the `AppMonitor`, and a custom Controller to enforce state.
 
 The `AppMonitor` encapsulates the autoscaling details for a Pod.
 The controller watches a Namespace for an `AppMonitor`, and for Pods that wish 
@@ -61,7 +62,7 @@ thresholds and requirements declared in the `AppMonitor` onto the Pod.
 * The Pod runs with a default set of resource requests & limits.
 
 * In the Pod's namespace there must also be an instantiated object of the custom
-`AppMonitor` TPR that the operator depends on e.g.:
+`AppMonitor` CRD that the operator depends on e.g.:
 
   ```
   apiVersion: kubedemo.com/v1
@@ -107,7 +108,7 @@ $ $GOPATH/bin/memhog-operator -v2 --prometheus-addr=http://localhost:9090 --kube
 > Note: Prometheus is assumed to be running by default on http://prometheus.tectonic-system:9090 (e.g. Tectonic Cluster) by the Operator Deployment
 
 ```
-// Create cluster role & cluster role binding to work with TPR's.
+// Create cluster role & cluster role binding to work with CRD's.
 $ kubectl create -f k8s/roles/role.yaml
 
 $ kubectl create -f k8s/deploy/memhog-operator-deploy.yaml
