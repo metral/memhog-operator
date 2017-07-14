@@ -3,4 +3,4 @@
 # Install dependencies
 rm -rf vendor
 glide cc
-glide install
+glide install -v -s
