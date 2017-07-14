@@ -39,3 +39,7 @@ import:
   - swagger
 - package: github.com/spf13/pflag
   version: master
+- package: k8s.io/apiextensions-apiserver
+  subpackages:
+  - pkg/client/clientset/clientset
+  - pkg/apis/apiextensions/v1beta1

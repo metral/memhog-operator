@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"reflect"
 	"time"
 
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -23,6 +24,7 @@ import (
 	prometheusClient "github.com/prometheus/client_golang/api"
 	prometheus "github.com/prometheus/client_golang/api/prometheus/v1"
 	"github.com/prometheus/common/model"
+	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 )
 
 // Implements an AppMonitor's controller loop in a particular namespace.
@@ -34,6 +36,9 @@ type AppMonitorController struct {
 
 	// Clientset that has a REST client for each k8s API group.
 	clientSet kubernetes.Interface
+
+	// APIExtensions Clientset that has a REST client for each k8s API group.
+	apiextensionsClientSet apiextensionsclient.Interface
 
 	// REST client for the AppMonitor resource k8s API group (since its not an
 	// official resource, there is no existing Clientset for it in k8s).
@@ -78,15 +83,23 @@ func NewAppMonitorController(kubeconfig, namespace, prometheusAddr string) (
 	if err != nil {
 		return nil, err
 	}
+	// Create a new k8s API client for API Extenstions from the kubeconfig
+	apiextensionsClientSet, err := apiextensionsclient.NewForConfig(kubecfg)
+	if err != nil {
+		return nil, err
+	}
 
 	// Create & register the AppMonitor resource as a TPR in the cluster, if it
 	// doesn't exist
+	kind := reflect.TypeOf(AppMonitor{}).Name()
 	glog.V(2).Infof("Registering TPR: %s.%s | version: %s", TPRName, Domain, Version)
-	_, err = tpr.CreateTPR(
-		clientSet,
-		fmt.Sprintf("%s.%s", TPRName, Domain),
+	_, err = tpr.CreateCustomResourceDefinition(
+		apiextensionsClientSet,
+		TPRName,
+		Domain,
+		kind,
+		ResourceNamePlural,
 		Version,
-		Description,
 	)
 	if err != nil {
 		return nil, err
@@ -107,11 +120,12 @@ func NewAppMonitorController(kubeconfig, namespace, prometheusAddr string) (
 
 	// Create new AppMonitorController
 	amc := &AppMonitorController{
-		kubecfg:        kubecfg,
-		clientSet:      clientSet,
-		restClient:     restClient,
-		namespace:      namespace,
-		prometheusAddr: prometheusAddr,
+		kubecfg:                kubecfg,
+		clientSet:              clientSet,
+		apiextensionsClientSet: apiextensionsClientSet,
+		restClient:             restClient,
+		namespace:              namespace,
+		prometheusAddr:         prometheusAddr,
 	}
 
 	// Create a new Informer for the AppMonitorController
