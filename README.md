@@ -28,6 +28,10 @@ The controller watches a Namespace for an `AppMonitor`, and for Pods that wish
 to be monitored (via Annotation). It then applies the operational
 thresholds and requirements declared in the `AppMonitor` onto the Pod.
 
+## Requirements
+* Kubernetes v1.7.0+
+* Prometheus on k8s with cAdvisor exposing `container_memory_usage_bytes`
+
 ## Process
 
 * To monitor the Pod's resource memory consumption, the operator requires that the Pod have an annotation in its `spec.template.metadata` to associate itself with the `memhog-operator`.
