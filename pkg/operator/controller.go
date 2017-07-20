@@ -407,7 +407,7 @@ func (amc *AppMonitorController) run() {
 		for len(r.Values) < 1 {
 			time.Sleep(500 * time.Millisecond)
 		}
-		val := r.Values[1].Value
+		val := r.Values[0].Value
 
 		currentBytes := int(val)
 		thresholdBytes := int(am.Spec.MemThresholdPercent) * int(podLimitsBytes) / 100
