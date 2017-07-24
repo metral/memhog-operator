@@ -121,3 +121,19 @@ $ kubectl create -f k8s/roles/role.yaml
 
 $ kubectl create -f k8s/deploy/memhog-operator-deploy.yaml
 ```
+
+### References
+
+* [ThirdPartyResources (TPR) -> CustomResourceDefinitions (CRD)](https://groups.google.com/forum/#!msg/kubernetes-dev/R749_-L_ssc/p-3tyl6mAQAJ)
+* [CRD Example](https://github.com/kubernetes/apiextensions-apiserver/tree/master/examples/client-go)
+* [The TPR is dead. Long live the CRD: Custom Resources in Kubernetes v1.7](https://coreos.com/blog/custom-resource-kubernetes-v17)
+* [Working with Controllers](https://github.com/kubernetes/community/blob/master/contributors/devel/controllers.md)
+* [Writing a Custom Controller - Aaron Levy (CoreOS)](https://github.com/aaronlevy/kube-controller-demo
+)
+  * [KubeCon EU 2017 Video](youtu.be/_BuqPMlXfpE?list=PLj6h78yzYM2PAavlbv0iZkod4IVh_iGqV)
+* [DaemonSet Controller Code](https://github.com/kubernetes/kubernetes/blob/master/pkg/controller/daemon/daemoncontroller.go)
+
+* Deprecated
+  * [TPRs are Deprecated](https://github.com/kubernetes/client-go/tree/df46f7f13b3da19b90b8b4f0d18b8adc6fbf28dc/examples/third-party-resources-deprecated
+)
+  * [Extend the Kubernetes API with TPRs](https://kubernetes.io/docs/tasks/access-kubernetes-api/extend-api-third-party-resource/)
