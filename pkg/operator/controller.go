@@ -195,7 +195,7 @@ func (amc *AppMonitorController) newPodInformer() (cache.Store, cache.Controller
 		// The resource that the informer returns
 		&v1.Pod{},
 		// The sync interval of the informer
-		10*time.Second,
+		5*time.Second,
 		// Callback functions for add, delete & update events
 		cache.ResourceEventHandlerFuncs{
 			// AddFunc: func(o interface{}) {}
@@ -209,7 +209,7 @@ func (amc *AppMonitorController) newPodInformer() (cache.Store, cache.Controller
 // - Watch for Pods that contain the 'app-monitor.kubedemo.com: true'
 // - Watch for any new AppMonitor resources in the current namespace.
 // annotation to indicate that an AppMonitor should operate on it.
-// - Poll annotated Pod's heap size rate for last 5 seconds from Prometheus
+// - Poll annotated Pod's heap size rate for an interval of time from Prometheus
 // - Compare Pod heap size to Pod memory limit using the memThresholdPercent
 
 // Callback for updates to a Pod Informer
@@ -258,7 +258,7 @@ func (amc *AppMonitorController) newAppMonitorInformer() (cache.Store, cache.Con
 		// The resource that the informer returns
 		&AppMonitor{},
 		// The sync interval of the informer
-		10*time.Second,
+		5*time.Second,
 		// Callback functions for add, delete & update events
 		cache.ResourceEventHandlerFuncs{
 			// AddFunc: func(o interface{}) {}
@@ -295,7 +295,7 @@ func (amc *AppMonitorController) Run(stop <-chan struct{}) {
 			return
 		default:
 			amc.run()
-			time.Sleep(3 * time.Second)
+			time.Sleep(2 * time.Second)
 		}
 	}
 }
@@ -404,10 +404,10 @@ func (amc *AppMonitorController) run() {
 		r := results[0]
 
 		// Retrieve the metric in the (time, metric) tuple
-		for len(r.Values) < 1 {
+		for len(r.Values) == 0 {
 			time.Sleep(500 * time.Millisecond)
 		}
-		val := r.Values[0].Value
+		val := r.Values[len(r.Values)-1].Value
 
 		currentBytes := int(val)
 		thresholdBytes := int(am.Spec.MemThresholdPercent) * int(podLimitsBytes) / 100
@@ -528,12 +528,12 @@ func (amc *AppMonitorController) newPodFromPod(pod *v1.Pod, am *AppMonitor) *v1.
 	}
 }
 
-// Query Prometheus over a range of the last 5 seconds
+// Query Prometheus over a range of time
 func queryPrometheus(client prometheus.API, query string) (
 	model.Value, error) {
 
 	now := time.Now()
-	start := now.Add(-5 * time.Second)
+	start := now.Add(-1 * time.Second)
 	results, err := client.QueryRange(
 		context.Background(),
 		query,
