@@ -31,6 +31,7 @@ thresholds and requirements declared in the `AppMonitor` onto the Pod.
 ## Requirements
 * Kubernetes v1.7.0+
 * Prometheus on k8s with cAdvisor exposing `container_memory_usage_bytes`
+* glide v0.11.1
 
 ## Process
 
@@ -100,7 +101,7 @@ e.g.:
 
 ```
 // Build
-$ glide up -v
+$ glide install -s -u -v
 $ make
 ```
 
