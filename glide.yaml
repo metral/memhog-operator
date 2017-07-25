@@ -10,6 +10,7 @@ import:
   - model
 - package: github.com/spf13/cobra
 - package: k8s.io/apimachinery
+  version: abe34e4f5b4413c282a83011892cbeea5b32223b
   subpackages:
   - pkg/api/errors
   - pkg/api/resource
@@ -40,6 +41,7 @@ import:
 - package: github.com/spf13/pflag
   version: master
 - package: k8s.io/apiextensions-apiserver
+  version: fbe70034cb9becd97bf8b6207f918c73cadd330e
   subpackages:
   - pkg/client/clientset/clientset
   - pkg/apis/apiextensions/v1beta1
