@@ -1,5 +1,4 @@
 FROM alpine:3.6
-MAINTAINER Mike Metral "metral@gmail.com"
 
 # Install base packages
 RUN apk update && apk upgrade && \
